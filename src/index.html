@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NomadTools — FiveM Cache Switcher</title>
+  <meta name="description" content="NomadTools: Kelola cache FiveM antar server dengan 1 klik. Monitor player count & cari pemain online." />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+  <link rel="stylesheet" href="styles/animations.css" />
+
+  <style>
+    /* Inline critical styles for form error states */
+    .form-input.error {
+      border-color: rgba(244, 63, 94, 0.6);
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1);
+    }
+    .field-error {
+      display: block;
+      color: #f43f5e;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Animated Background ─────────────────────────────────────────── -->
+<div id="bg-canvas" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+</div>
+
+<!-- ── App Shell ──────────────────────────────────────────────────── -->
+<div id="app">
+
+  <!-- Top Bar -->
+  <header id="topbar" role="banner">
+    <!-- Logo -->
+    <div class="topbar-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#22d3ee"/>
+            <stop offset="100%" stop-color="#10b981"/>
+          </linearGradient>
+        </defs>
+        <!-- Compass/nomad icon: circle + arrow paths -->
+        <circle cx="16" cy="16" r="13" stroke="url(#logoGrad)" stroke-width="2" fill="none"/>
+        <path d="M16 8 L19 16 L16 14 L13 16 Z" fill="url(#logoGrad)"/>
+        <circle cx="16" cy="16" r="2" fill="url(#logoGrad)" opacity="0.7"/>
+      </svg>
+      <span class="topbar-logo-text">NomadTools</span>
+    </div>
+
+    <!-- View Switcher + Search -->
+    <div class="topbar-center">
+      <nav class="topbar-nav" role="tablist" aria-label="Navigasi tampilan">
+        <button class="nav-tab active" id="tab-btn-dashboard" role="tab" aria-selected="true" aria-controls="main-content">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Server List
+        </button>
+        <button class="nav-tab" id="tab-btn-storage" role="tab" aria-selected="false" aria-controls="storage-view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          Kelola Cache
+        </button>
+      </nav>
+      <div class="search-wrap" id="search-wrap-main">
+        <span class="search-icon" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        </span>
+        <input
+          id="global-search"
+          type="search"
+          class="search-input"
+          placeholder="Cari server..."
+          aria-label="Cari server"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="topbar-right">
+      <button class="btn-icon" id="btn-settings" title="Pengaturan" aria-label="Buka pengaturan">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content: Server Grid -->
+  <main id="main-content" role="main">
+
+    <!-- Empty State (shown when no servers) -->
+    <div id="empty-state" style="display:none" role="status" aria-live="polite">
+      <svg class="empty-icon" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <h1 class="empty-title">Belum ada server</h1>
+      <p class="empty-sub">Tambahkan server FiveM pertamamu dan mulai kelola cache dengan mudah.</p>
+      <button class="btn-primary-lg" id="btn-add-server-empty" aria-label="Tambah server pertama">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Tambah Server
+      </button>
+    </div>
+
+    <!-- Server Cards Grid -->
+    <div id="server-grid" role="list" aria-label="Daftar server"></div>
+
+  </main>
+
+  <!-- ── Storage Cache Management View ──────────────────────────────── -->
+  <div id="storage-view" style="display:none" role="main" aria-label="Kelola Storage Cache">
+
+    <!-- Summary Stats Row -->
+    <div class="storage-summary-row">
+      <div class="storage-stat-card" id="stat-total">
+        <div class="storage-stat-icon">💾</div>
+        <div class="storage-stat-body">
+          <div class="storage-stat-value" id="stat-total-val">—</div>
+          <div class="storage-stat-label">Total Semua Cache</div>
+        </div>
+      </div>
+      <div class="storage-stat-card" id="stat-active">
+        <div class="storage-stat-icon">🎮</div>
+        <div class="storage-stat-body">
+          <div class="storage-stat-value" id="stat-active-val">—</div>
+          <div class="storage-stat-label">Cache Aktif (FiveM)</div>
+        </div>
+      </div>
+      <div class="storage-stat-card" id="stat-stored">
+        <div class="storage-stat-icon">📦</div>
+        <div class="storage-stat-body">
+          <div class="storage-stat-value" id="stat-stored-val">—</div>
+          <div class="storage-stat-label">Disimpan di Storage</div>
+        </div>
+      </div>
+      <div class="storage-stat-card" id="stat-count">
+        <div class="storage-stat-icon">🗂️</div>
+        <div class="storage-stat-body">
+          <div class="storage-stat-value" id="stat-count-val">—</div>
+          <div class="storage-stat-label">Server Tersimpan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Storage Path Info -->
+    <div class="storage-path-row">
+      <div class="storage-path-info">
+        <span class="storage-path-label">📂 Folder Storage:</span>
+        <span class="storage-path-value" id="storage-path-text">—</span>
+      </div>
+      <button class="btn-storage-action" id="btn-open-storage-folder" title="Buka di Windows Explorer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Buka Folder
+      </button>
+      <button class="btn-storage-action" id="btn-refresh-storage" title="Refresh data storage">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Server Cache List -->
+    <div class="storage-list-header">
+      <div class="storage-col-server">Server</div>
+      <div class="storage-col-status">Status</div>
+      <div class="storage-col-files">File</div>
+      <div class="storage-col-size">Ukuran</div>
+      <div class="storage-col-actions">Aksi</div>
+    </div>
+    <div id="storage-server-list" class="storage-server-list">
+      <div class="storage-loading">Memuat data cache...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MODALS & PANELS (hidden by default)
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- Dim Overlay -->
+<div id="overlay" class="overlay" role="presentation" aria-hidden="true"></div>
+
+<!-- ── Add / Edit Server Modal ──────────────────────────────────────── -->
+<div id="add-edit-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-header">
+    <h2 class="modal-title" id="modal-title">Tambah Server Baru</h2>
+    <button class="btn-icon" id="btn-modal-close-x" aria-label="Tutup" onclick="document.getElementById('btn-modal-cancel').click()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label class="form-label" for="field-server-name">Nama Server</label>
+      <input id="field-server-name" type="text" class="form-input" placeholder="Contoh: CKRP - City Kingdom RP" autocomplete="off" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="field-join-code">Join Code</label>
+      <input id="field-join-code" type="text" class="form-input" placeholder="Kode dari cfx.re/join/..." autocomplete="off" spellcheck="false" />
+      <span class="form-helper">Kode unik setelah <code>cfx.re/join/</code> — contoh: <code>abc123</code></span>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="field-cache-path">Lokasi Cache Storage</label>
+      <div class="form-input-row">
+        <input id="field-cache-path" type="text" class="form-input" placeholder="Pilih folder backup cache..." readonly />
+        <button class="btn-browse" id="btn-browse-cache" type="button">📁 Browse</button>
+      </div>
+      <span class="form-helper">Folder tempat menyimpan cache server ini saat tidak aktif. Bebas pilih drive/folder manapun.</span>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" id="btn-modal-cancel" type="button">Batal</button>
+    <button class="btn btn-solid-primary" id="btn-modal-save" type="button">Tambah Server</button>
+  </div>
+</div>
+
+<!-- ── FiveM Running Warning Modal ─────────────────────────────────── -->
+<div id="warning-modal" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="warning-modal-heading">
+  <div class="modal-header">
+    <h2 class="modal-title" id="warning-modal-heading">⚠️ FiveM Sedang Berjalan</h2>
+  </div>
+  <div class="modal-body" style="align-items:center; text-align:center; gap:16px">
+    <div class="warning-modal-icon">
+      <div class="warning-icon-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+    </div>
+    <p class="warning-modal-text">
+      FiveM sedang berjalan.<br/>
+      Menukar cache saat FiveM aktif dapat menyebabkan data <strong>corrupt</strong>.<br/><br/>
+      Disarankan untuk menutup FiveM terlebih dahulu sebelum melanjutkan.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" id="btn-warning-cancel" type="button">Batal</button>
+    <button class="btn btn-solid-warning" id="btn-warning-confirm" type="button">⚠️ Tetap Lanjutkan</button>
+  </div>
+</div>
+
+
+<!-- ── Generic Confirm Modal ────────────────────────────────────────── -->
+<div id="confirm-modal" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+  <div class="modal-header">
+    <h2 class="modal-title" id="confirm-modal-title">Konfirmasi</h2>
+  </div>
+  <div class="modal-body" style="align-items:center; text-align:center; gap:16px">
+    <div class="confirm-modal-icon">
+      <div class="confirm-icon-wrap danger" id="confirm-icon-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+    </div>
+    <p class="confirm-modal-text" id="confirm-modal-body"></p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" id="btn-confirm-cancel" type="button">Batal</button>
+    <button class="btn btn-solid-danger" id="btn-confirm-ok" type="button">Hapus</button>
+  </div>
+</div>
+
+<!-- ── Player List Panel (slide-in dari kanan) ──────────────────────── -->
+<aside id="player-panel" role="complementary" aria-label="Daftar player server" aria-hidden="true">
+  <div class="panel-header">
+    <div class="panel-title-row">
+      <h2 class="panel-title" id="panel-title">Player List</h2>
+      <button class="btn-icon" id="btn-close-panel" aria-label="Tutup panel player">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <!-- Local search — filters only THIS server's players -->
+    <div class="panel-search-wrap">
+      <span class="search-icon" aria-hidden="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </span>
+      <input
+        id="panel-search-input"
+        type="search"
+        class="panel-search"
+        placeholder="Cari nama player..."
+        aria-label="Cari nama player di server ini"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+  </div>
+
+  <!-- Player list (scrollable) -->
+  <div class="panel-player-list scrollable" id="panel-player-list" role="list" aria-live="polite">
+    <!-- Filled dynamically -->
+  </div>
+
+  <!-- Footer: count info -->
+  <div class="panel-footer" id="panel-footer" role="status" aria-live="polite">
+    —
+  </div>
+</aside>
+
+<!-- ── Settings Panel (slide-in dari kanan) ─────────────────────────── -->
+<aside id="settings-panel" role="complementary" aria-label="Pengaturan" aria-hidden="true">
+  <div class="settings-header">
+    <h2 class="settings-title">⚙️ Pengaturan</h2>
+    <button class="btn-icon" id="btn-close-settings" aria-label="Tutup pengaturan">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="settings-body">
+
+    <!-- Section 1: FiveM Cache Path -->
+    <section class="settings-section">
+      <div class="settings-section-title">Path FiveM Cache</div>
+      <div class="path-display" id="settings-fivem-path" title="Path folder server-cache-priv FiveM">
+        Memuat...
+      </div>
+      <button class="btn btn-ghost" id="btn-change-fivem-path" style="align-self:flex-start">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Ubah Path
+      </button>
+    </section>
+
+    <!-- Section 1b: Global Cache Storage Path -->
+    <section class="settings-section">
+      <div class="settings-section-title">Folder Storage Cache Utama</div>
+      <div class="settings-row-sub" style="margin-bottom:6px">Folder utama tempat semua cache backup server non-aktif disimpan (bebas drive D:, E:, dll)</div>
+      <div class="path-display" id="settings-global-cache-path" title="Folder utama tempat semua cache server disimpan">
+        Memuat...
+      </div>
+      <button class="btn btn-ghost" id="btn-change-global-cache-path" style="align-self:flex-start">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        Pilih Folder Utama
+      </button>
+    </section>
+
+    <!-- Section 2: Refresh Interval -->
+    <section class="settings-section">
+      <div class="settings-section-title">Refresh Player Count</div>
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Interval Refresh</div>
+          <div class="settings-row-sub">Seberapa sering player count diperbarui otomatis</div>
+        </div>
+        <select class="form-select" id="settings-refresh-interval" aria-label="Interval refresh player count">
+          <option value="15">15 detik</option>
+          <option value="30" selected>30 detik</option>
+          <option value="60">1 menit</option>
+          <option value="300">5 menit</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Section 3: Auto-Connect -->
+    <section class="settings-section">
+      <div class="settings-section-title">Koneksi Otomatis</div>
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-label">Auto-Connect Setelah Swap</div>
+          <div class="settings-row-sub">Langsung join server via FiveM setelah cache berhasil ditukar</div>
+        </div>
+        <label class="toggle-wrap" aria-label="Toggle auto-connect">
+          <input type="checkbox" id="settings-auto-connect" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Section 4: Config Export/Import & Presets -->
+    <section class="settings-section">
+      <div class="settings-section-title">Config & Presets Server Indo</div>
+      <button class="btn btn-primary" id="btn-sync-remote" style="width:100%; margin-bottom:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        🔄 Sync Server Online (GitHub)
+      </button>
+      <button class="btn btn-ghost" id="btn-load-presets" style="width:100%; margin-bottom:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" style="margin-right:4px">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>
+        </svg>
+        🇮🇩 Muat Preset Server Indonesia
+      </button>
+      <div class="config-actions">
+        <button class="btn btn-ghost" id="btn-export-config">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export Config
+        </button>
+        <button class="btn btn-ghost" id="btn-import-config">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Import Config
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 5: History Log -->
+    <section class="settings-section">
+      <div class="settings-section-title">Riwayat Swap Cache</div>
+      <div class="history-table-wrap">
+        <table class="history-table" aria-label="Riwayat swap cache">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Dari</th>
+              <th>Ke</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr>
+              <td colspan="4" style="text-align:center; color:var(--text-muted); padding:16px">
+                Belum ada riwayat.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</aside>
+
+<!-- ── Toast Container ───────────────────────────────────────────────── -->
+<div id="toast-container" aria-live="assertive" aria-atomic="false" aria-label="Notifikasi"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     Scripts (ES Modules)
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+  // Wire up empty state "Tambah Server" button (can't import module in inline)
+  document.getElementById('btn-add-server-empty')?.addEventListener('click', () => {
+    document.getElementById('btn-add-server').click();
+  });
+</script>
+<script type="module" src="scripts/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+# ── Rust / Cargo ─────────────────────────────
+/src-tauri/target/
+
+# ── Node / NPM ───────────────────────────────
+node_modules/
+dist/
+.env
+.env.local
+
+# ── Tauri ────────────────────────────────────
+src-tauri/WixTools/
+
+# ── Windows ──────────────────────────────────
+Thumbs.db
+Desktop.ini
+
+# ── OS ───────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ── Portable binary (jangan di-push, ukurannya besar) ─────
+NomadTools.exe
+
+# ── IDE ──────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.suo
+*.user

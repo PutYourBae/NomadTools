@@ -1,0 +1,138 @@
+/* ═══════════════════════════════════════════════════════════════
+   NomadTools — Animations & Motion
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Background Blob Float ───────────────────────────────────────── */
+@keyframes blobFloat {
+  0%   { transform: translate(0px, 0px) scale(1);   }
+  20%  { transform: translate(40px, -30px) scale(1.05); }
+  40%  { transform: translate(-20px, 40px) scale(0.95); }
+  60%  { transform: translate(30px, 20px) scale(1.03); }
+  80%  { transform: translate(-40px, -20px) scale(0.98); }
+  100% { transform: translate(0px, 0px) scale(1);   }
+}
+
+/* ── Online Dot Pulse ────────────────────────────────────────────── */
+@keyframes pulseGreen {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(34, 197, 94, 0.6);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.9), 0 0 20px rgba(34, 197, 94, 0.3);
+    transform: scale(1.2);
+  }
+}
+
+/* ── Active Badge Glow ───────────────────────────────────────────── */
+@keyframes badgeGlow {
+  0%   { box-shadow: 0 0 6px rgba(6,182,212,0.3); }
+  100% { box-shadow: 0 0 14px rgba(6,182,212,0.6); }
+}
+
+/* ── Spinner ─────────────────────────────────────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Card Loading Pulse ──────────────────────────────────────────── */
+@keyframes cardPulse {
+  0%, 100% { opacity: 0.85; }
+  50%       { opacity: 0.65; }
+}
+
+.server-card.is-loading {
+  animation: cardPulse 1.2s ease-in-out infinite;
+}
+
+/* ── Toast Slide In ──────────────────────────────────────────────── */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+/* ── Context Menu ────────────────────────────────────────────────── */
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Active Card Transition ──────────────────────────────────────── */
+@keyframes activeGlowPop {
+  0%   { box-shadow: 0 0 0 0 var(--accent-active-glow), 0 8px 32px rgba(0,0,0,0.35); }
+  50%  { box-shadow: 0 0 0 8px rgba(6,182,212,0) , 0 8px 32px rgba(0,0,0,0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(6,182,212,0) , 0 8px 32px rgba(0,0,0,0.35); }
+}
+
+.server-card.just-activated {
+  animation: activeGlowPop 600ms ease;
+}
+
+/* ── Player List Item Fade In ────────────────────────────────────── */
+@keyframes playerFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.player-item {
+  animation: playerFadeIn 200ms ease both;
+}
+
+/* ── Swap Success Active indicator ───────────────────────────────── */
+@keyframes swapActivePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+
+/* ── Empty state entrance ────────────────────────────────────────── */
+@keyframes emptyFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#empty-state {
+  animation: emptyFadeUp 400ms ease;
+}
+
+/* ── Skeleton shimmer (for loading state) ────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
